@@ -29,7 +29,13 @@ io.use((socket, next) => {
 
 io.on('connection', socket => {
     socket.emit('newUser', { PlayerId: socket.id });
+
+    socket.on('userMove', (data) => {
+      socket.emit('userMove',{ PlayerId: socket.id }, data);
+    });
+
 });
+
 
 server.listen(port);
 console.log('listening on *:' + port);
