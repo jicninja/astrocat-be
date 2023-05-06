@@ -7,8 +7,10 @@ const port = process.env.PORT || 3000;
 const app = express();
 const server = createServer(app);
 
+app.use(express.static('public'));
+
 app.get('/',function(req,res) {
-  res.sendFile(path.join(__dirname+'/index.html'));
+  res.sendFile(path.join(__dirname+'/public/index.html'));
 });
 
 const io = require('socket.io')(server, {

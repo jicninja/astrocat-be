@@ -1,7 +1,15 @@
 <!DOCTYPE html>
 <html>
-    <head></head>
-    <body></body>
+    <head>
+        <link rel="stylesheet" href="style.css">
+        <title>Astrocat Circuit Rescue</title>
+    </head>
+    <body>
+        <main>
+            <h1 class="hero-heading">Astrocat <div>Circuit Rescue</div></h1>
+            <p2 class="coming-soon">Coming Soon</p2>
+        </main>
+    </body>
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
     <script>
         const socket = io("https://astrocatcr-be.onrender.com/");
@@ -9,7 +17,4 @@
             console.log('debug---->', data);
         });
     </script>
-
-    <div>Hola</div>
-
 </html>
