@@ -6,6 +6,7 @@
   });
 
   io.use((socket, next) => {
+      console.log('debug--->', socket);
       if (socket.handshake.query.token === "UNITY") {
           next();
       } else {
@@ -14,7 +15,7 @@
   });
 
   io.on('connection', socket => {
-
+      console.log('debug connected--->', socket);
       socket.emit('newUser', { PlayerId: socket.id });
       /*
     socket.on('hi', (data) => {
