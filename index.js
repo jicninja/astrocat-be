@@ -1,5 +1,9 @@
   const port = process.env.PORT || 3000;
-  const io = require('socket.io')();
+  const io = require('socket.io')({
+    cors: {
+      origin: '*'
+    }    
+  });
 
   io.use((socket, next) => {
       if (socket.handshake.query.token === "UNITY") {
