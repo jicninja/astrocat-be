@@ -1,6 +1,7 @@
 const express = require('express');
-const { createServer, get } = require('http');
+const { createServer } = require('http');
 const { addPlayer, getOtherPlayers, getPlayer, editPlayer, deletePlayer } = require('./modules/playerCache');
+const { getRandom } = require('./utils/random');
 const path = require('path');
 
 const app = express();
@@ -10,54 +11,79 @@ const port = process.env.PORT || 3000;
 
 /* STATIC SERVER - Landing Page */
 app.use(express.static('public'));
-app.get('/',function(req,res) {
-  res.sendFile(path.join(__dirname+'/public/index.html'));
+app.get('/', function (req, res) {
+  res.sendFile(path.join(__dirname + '/public/index.html'));
 });
 
 /* RealTime Server */
 const io = require('socket.io')(server, {
   cors: {
     origin: '*'
-  }    
+  }
 });
 
-/* Authentication */
+/* Authentication 
 io.use((socket, next) => {
-    if (socket.handshake.query.token === 'UNITY') {
-        next();
-    } else {
-        next(new Error('Authentication error'));
-    }
+  if (socket.handshake.query.token === 'UNREAL') {
+    next();
+  } else {
+    next(new Error('Authentication error'));
+  }
 });
+*/
 
 /* On Connect */
 io.on('connection', socket => {
   const { id } = socket;
 
-  /* Add player cache */
-  addPlayer(id, { position : 0 });
+  const initUserData = {
+    pos: {
+      x: getRandom(300),
+      y: getRandom(300),
+      z: 0.0,
+    },
+    rot: {
+      pitch: 0.0,
+      yaw: 0.0,
+      roll: 0.0,
+    },
+    vel: {
+      x: 0.0,
+      y: 0.0,
+      z: 0.0,
+    },
+  };
 
-  /* Emit existing user */
-  const otherUsers = getOtherPlayers(id);
-  if(otherUsers.length) {
-    socket.emit('existingUsers', otherUsers);
+  addPlayer(id, initUserData);
+  socket.emit('userStart', initUserData);
+
+  console.log('new user ---->', id, initUserData);
+
+  const users = getOtherPlayers(id);
+
+  if (users.length) {
+    //console.log('existing useeeers', id, { users });
+    socket.emit('existingUsers', { users });
   }
-  
+
+
   /*  Broadcast new user */
-  socket.broadcast.emit('newUser', socket.id);
-    socket.on('moveUser', data => { 
-      const currentPlayer = getPlayer(id);
-      if(currentPlayer.position != data) {
-        editPlayer(id, { position: data });  
-          // console.log('id: ', socket.id, ' pos:',  data);
-          socket.broadcast.emit('moveUser', id, currentPlayer.position);
-      }
+  socket.broadcast.emit('newUser', { id, ...initUserData });
+  socket.on('moveUser', data => {
+    const currentPlayer = getPlayer(id);
+
+    if (currentPlayer && currentPlayer != data) {
+      editPlayer(id, data);
+      socket.broadcast.emit('moveUser', data);
+    }
   });
 
 
-  socket.on('disconnect', () => {    
+  socket.on('disconnect', () => {
+
+    console.log('debug exit,', getPlayer(id), id);
     deletePlayer(id);
-    socket.broadcast.emit('removeUser', { id });
+    socket.broadcast.emit('removeUser', id);
   });
 
 });
